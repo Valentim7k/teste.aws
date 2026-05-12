@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AWS HyperScale | Next-Gen Cloud Infrastructure — Enterprise Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Sora:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ===================================================================
+           ROOT VARIABLES — DARK MODE (CINEMATIC DEFAULT)
+        =================================================================== */
+        :root {
+            --bg-deep: #02040f;
+            --bg-primary: #050816;
+            --bg-secondary: #0b1220;
+            --bg-tertiary: #0f172a;
+            --glass-bg: rgba(11, 18, 32, 0.75);
+            --glass-border: rgba(0, 207, 255, 0.3);
+            --cyan-primary: #00cfff;
+            --cyan-glow: #00cfff;
+            --purple-primary: #7b61ff;
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e6;
+            --text-muted: #64748b;
+            --shadow-glow: 0 0 25px rgba(0, 207, 255, 0.25);
+            --card-shadow: 0 25px 40px -15px rgba(0, 207, 255, 0.2);
+            --transition-smooth: cubic-bezier(0.23, 1, 0.32, 1);
+            --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --transition-elastic: cubic-bezier(0.5, 1.2, 0.4, 1);
+        }
+
+        /* ===================================================================
+           LIGHT MODE — PERFECT CONTRAST, FULLY FUNCTIONAL
+        =================================================================== */
+        body.light-mode {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #eef2ff;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(37, 99, 235, 0.35);
+            --cyan-primary: #2563eb;
+            --cyan-glow: #3b82f6;
+            --purple-primary: #7b61ff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.2);
+            --card-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background-color 0.4s var(--transition-smooth), color 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* ===================================================================
+           CURSOR PREMIUM — LUA CRESCENTE (DARK) / SOL (LIGHT)
+        =================================================================== */
+        .cursor-luxury, .cursor-trail {
+            pointer-events: none;
+            position: fixed;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: 0.12s linear;
+        }
+        .cursor-luxury {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 207, 255, 0.08);
+            border: 1.5px solid var(--cyan-primary);
+            backdrop-filter: blur(2px);
+            transition: 0.08s ease-out;
+        }
+        body.light-mode .cursor-luxury {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: #2563eb;
+        }
+        .cursor-trail {
+            width: 5px;
+            height: 5px;
+            background: var(--cyan-primary);
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: 0.6;
+        }
+        @media (max-width: 768px) { .cursor-luxury, .cursor-trail { display: none; } }
+
+        /* ===================================================================
+           INSANE BACKGROUND — NEBULOSA + GRID + PARTICLES
+        =================================================================== */
+        #bg-advanced-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===================================================================
+           PROGRESS BAR + SCROLL TOP
+        =================================================================== */
+        .progress-global {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan-primary), var(--purple-primary));
+            z-index: 10002;
+            transition: width 0.08s linear;
+        }
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--cyan-primary);
+            color: var(--cyan-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+            font-size: 1.4rem;
+        }
+        .scroll-top-btn.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .scroll-top-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* ===================================================================
+           CINEMATIC LOADER — SCI-FI / HOLOGRAM
+        =================================================================== */
+        .loader-sci-fi {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #010318, #000000);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: 1.2s var(--transition-smooth);
+        }
+        .hologram-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, var(--cyan-primary), var(--purple-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 0 20px var(--cyan-primary));
+            animation: glitchPulse 1.2s infinite alternate;
+        }
+        @keyframes glitchPulse {
+            0% { text-shadow: -2px 0 var(--cyan-primary), 2px 0 var(--purple-primary); opacity: 0.9; }
+            100% { text-shadow: 2px 0 var(--cyan-primary), -2px 0 var(--purple-primary); opacity: 1; }
+        }
+        .scanner-bar {
+            width: 350px;
+            height: 3px;
+            background: rgba(0,207,255,0.3);
+            margin: 2rem 0 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .scanner-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan-primary), var(--purple-primary));
+            transition: width 0.12s linear;
+        }
+        .loader-percentage-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            color: var(--cyan-primary);
+            margin-top: 1rem;
+        }
+
+        /* ===================================================================
+           NAVBAR PREMIUM
+        =================================================================== */
+        nav {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-40px);
+            width: 90%;
+            max-width: 1320px;
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-radius: 80px;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border: 1px solid var(--glass-border);
+            transition: 0.3s;
+            opacity: 0;
+            animation: navIn 0.8s var(--transition-smooth) 1.2s forwards;
+        }
+        @keyframes navIn { to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .logo-text {
+            font-family: 'Orbitron', monospace;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #fff, var(--cyan-primary), var(--purple-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin: 0 1.2rem;
+            font-weight: 500;
+            transition: 0.2s;
+            position: relative;
+        }
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--cyan-primary);
+            transition: 0.3s;
+        }
+        .nav-menu a:hover::after { width: 100%; }
+        .theme-toggle {
+            background: rgba(255,255,255,0.08);
+            border-radius: 40px;
+            padding: 0.4rem 1.2rem;
+            border: 1px solid var(--cyan-primary);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        /* ===================================================================
+           HERO SECTION — CINEMATOGRAPHIC
+        =================================================================== */
+        .hero-cinematic {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 3rem;
+            position: relative;
+        }
+        .hero-left {
+            flex: 1;
+            z-index: 12;
+        }
+        .hero-title {
+            font-size: 4.8rem;
+            font-weight: 800;
+            line-height: 1.1;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .hero-glow-text {
+            background: linear-gradient(135deg, #fff, var(--cyan-primary), var(--purple-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero-typed {
+            font-size: 1.3rem;
+            margin: 1.8rem 0;
+            min-height: 85px;
+            color: var(--text-secondary);
+        }
+        .btn-magnetic-premium {
+            background: linear-gradient(90deg, var(--cyan-primary), var(--purple-primary));
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            color: #050816;
+        }
+        .hero-canvas-3d {
+            flex: 1;
+            height: 480px;
+            border-radius: 36px;
+            background: rgba(0,0,0,0.15);
+            backdrop-filter: blur(2px);
+        }
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: softBounce 2s infinite;
+            color: var(--cyan-primary);
+        }
+        @keyframes softBounce { 0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(10px);} }
+
+        /* ===================================================================
+           GLASS CARDS PREMIUM + MODAL
+        =================================================================== */
+        .grid-cards-ultra {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .glass-ultra {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s var(--transition-elastic);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-ultra:hover {
+            transform: translateY(-12px) scale(1.02);
+            border-color: var(--cyan-primary);
+            box-shadow: var(--card-shadow);
+        }
+        .glass-ultra i { font-size: 2.5rem; color: var(--cyan-primary); margin-bottom: 1rem; }
+
+        .modal-premium-ultra {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s var(--transition-smooth);
+        }
+        .modal-premium-ultra.active { opacity: 1; visibility: visible; }
+        .modal-card {
+            background: var(--bg-secondary);
+            border-radius: 48px;
+            padding: 2.5rem;
+            max-width: 520px;
+            width: 90%;
+            border: 1px solid var(--cyan-primary);
+            transform: scale(0.95);
+            transition: transform 0.3s var(--transition-bounce);
+        }
+        .modal-premium-ultra.active .modal-card { transform: scale(1); }
+
+        /* ===================================================================
+           ARQUITETURA COM LINHAS FLUXO
+        =================================================================== */
+        .arch-flow-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            background: rgba(0,0,0,0.35);
+            border-radius: 56px;
+            padding: 2rem;
+            position: relative;
+        }
+        .arch-node-glow {
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-primary));
+            padding: 0.8rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--cyan-primary);
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        /* ===================================================================
+           DASHBOARD PRO
+        =================================================================== */
+        .dashboard-premium-pro {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1.2rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 48px;
+            padding: 2rem;
+        }
+        .metric-card-pro {
+            background: var(--glass-bg);
+            border-radius: 28px;
+            padding: 1.2rem;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+        .metric-card-pro span { font-size: 2.2rem; font-weight: 800; color: var(--cyan-primary); display: block; margin-top: 0.5rem; }
+
+        /* ===================================================================
+           MAPA GLOBAL COM LINHAS ANIMADAS
+        =================================================================== */
+        .map-container-epic {
+            background: radial-gradient(circle, var(--bg-secondary), var(--bg-primary));
+            border-radius: 48px;
+            padding: 2rem;
+            height: 460px;
+            position: relative;
+            overflow: hidden;
+        }
+        .map-dot-pulse {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--cyan-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--cyan-primary);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .timeline-premium-flex {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .timeline-node-card {
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-primary));
+            padding: 1.5rem;
+            border-radius: 32px;
+            flex: 1;
+            text-align: center;
+            border-top: 3px solid var(--cyan-primary);
+        }
+
+        .comparison-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        .card-legacy, .card-cloud {
+            padding: 2rem;
+            border-radius: 32px;
+            background: var(--glass-bg);
+        }
+        .quiz-epic {
+            background: var(--glass-bg);
+            border-radius: 48px;
+            padding: 2rem;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--glass-border);
+        }
+        .fade-up { opacity: 0; transform: translateY(50px); transition: all 0.8s var(--transition-smooth); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+        h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #fff, var(--purple-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+        section { margin: 7rem 0; }
+        @media (max-width: 800px) {
+            .hero-title { font-size: 2.2rem; }
+            .comparison-split { grid-template-columns: 1fr; }
+            .nav-menu a { margin: 0 0.6rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-global" id="globalProgress"></div>
+    <canvas id="bg-advanced-canvas"></canvas>
+    <div class="cursor-luxury" id="luxuryCursor"></div>
+    <div class="cursor-trail" id="cursorTrail"></div>
+    <div class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></div>
+
+    <!-- LOADER SCI-FI CINEMATOGRAPHIC -->
+    <div class="loader-sci-fi" id="cinematicLoader">
+        <div class="hologram-logo">AWS HyperScale</div>
+        <div class="scanner-bar"><div class="scanner-progress" id="scannerFill"></div></div>
+        <div class="loader-percentage-number" id="loaderNumber">0%</div>
+        <div style="margin-top: 1rem; font-size:0.7rem; letter-spacing:2px;">INITIALIZING CLOUD MATRIX</div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo-text"><i class="fas fa-cloud-upload-alt"></i> AWS HyperScale</div>
+        <div class="nav-menu"><a href="#">Platform</a><a href="#">Infra</a><a href="#">Solutions</a><a href="#">Enterprise</a></div>
+        <div class="theme-toggle" id="globalThemeToggle"><i class="fas fa-moon"></i> Dark</div>
+    </nav>
+
+    <div class="container" style="max-width:1400px; margin:0 auto; padding:0 2rem; position:relative; z-index:10;">
+        <!-- HERO CINEMATIC -->
+        <section class="hero-cinematic">
+            <div class="hero-left">
+                <div class="hero-title">COMPUTAÇÃO EM NUVEM<br><span class="hero-glow-text">NA AWS</span></div>
+                <div class="hero-typed" id="heroTypedElite"></div>
+                <button class="btn-magnetic-premium" id="exploreEliteBtn">Explorar Infraestrutura <i class="fas fa-arrow-right"></i></button>
+            </div>
+            <canvas id="heroCanvasPremium" class="hero-canvas-3d" width="500" height="480"></canvas>
+            <div class="scroll-hint"><i class="fas fa-chevron-down"></i></div>
+        </section>
+
+        <!-- CARDS AWS SERVICES (Modais Interativos) -->
+        <section class="fade-up"><h2><i class="fas fa-microchip"></i> AWS Core Services</h2>
+            <div class="grid-cards-ultra" id="servicesGrid">
+                <div class="glass-ultra" data-srv="ec2"><i class="fab fa-aws"></i><h3>Amazon EC2</h3><p>Elastic Compute Cloud</p></div>
+                <div class="glass-ultra" data-srv="s3"><i class="fas fa-archive"></i><h3>Amazon S3</h3><p>Armazenamento infinito</p></div>
+                <div class="glass-ultra" data-srv="rds"><i class="fas fa-database"></i><h3>Amazon RDS</h3><p>Banco gerenciado</p></div>
+                <div class="glass-ultra" data-srv="lambda"><i class="fas fa-code"></i><h3>AWS Lambda</h3><p>Serverless nativo</p></div>
+                <div class="glass-ultra" data-srv="cloudfront"><i class="fas fa-globe"></i><h3>CloudFront</h3><p>CDN Global 310+</p></div>
+            </div>
+        </section>
+
+        <!-- ARQUITETURA COM FLUXO -->
+        <section class="fade-up"><h2>🏗️ Arquitetura Global de Escala</h2>
+            <div class="arch-flow-container" id="archFlowContainer">
+                <div class="arch-node-glow" data-info="Usuário final">🌎 Usuário</div>
+                <div class="arch-node-glow" data-info="Route53 DNS">📍 Route53</div>
+                <div class="arch-node-glow" data-info="CloudFront CDN">⚡ CloudFront</div>
+                <div class="arch-node-glow" data-info="Load Balancer">⚖️ ALB</div>
+                <div class="arch-node-glow" data-info="EC2 Auto Scaling">📈 EC2 ASG</div>
+                <div class="arch-node-glow" data-info="RDS Multi-AZ">🗄️ RDS</div>
+                <div class="arch-node-glow" data-info="S3 + Lambda">📦 S3/Lambda</div>
+            </div>
+            <div id="archMessageDynamic" style="text-align:center; margin-top:1rem; color:var(--cyan-primary);"></div>
+        </section>
+
+        <!-- CASES REAIS -->
+        <section class="fade-up"><h2>📈 Casos de Sucesso Global</h2>
+            <div class="grid-cards-ultra">
+                <div class="glass-ultra"><i class="fas fa-shoe-prints"></i><h3>Nike SNKRS</h3><p>500k acessos em 2min → Auto Scaling + CloudFront responderam.</p></div>
+                <div class="glass-ultra"><i class="fas fa-film"></i><h3>Netflix</h3><p>Milhões simultâneos streaming CloudFront/S3.</p></div>
+                <div class="glass-ultra"><i class="fas fa-university"></i><h3>Nubank</h3><p>Alta disponibilidade bancária com RDS Multi-AZ.</p></div>
+                <div class="glass-ultra"><i class="fas fa-chart-line"></i><h3>Black Friday</h3><p>Escalabilidade automática salvou picos de 1.5M req/s</p></div>
+            </div>
+        </section>
+
+        <!-- SIMULAÇÃO BLACK FRIDAY -->
+        <section class="fade-up"><h2>⚡ Simulação Black Friday</h2>
+            <div style="background:var(--bg-secondary); border-radius: 48px; padding:2rem;">
+                <button id="bfStartBtn" style="background:#ff3366; border:none; padding:1rem 2rem; border-radius:60px; color:white; font-weight:bold; cursor:pointer;"><i class="fas fa-fire"></i> INICIAR PROMOÇÃO GLOBAL</button>
+                <div id="bfGraphVisual" style="display:flex; gap:0.8rem; align-items:flex-end; height:210px; margin:2rem 0; justify-content:center;"></div>
+                <div id="bfMessageArea" style="text-align:center;"></div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD PREMIUM LIVE -->
+        <section class="fade-up"><h2>📊 Control Center (Live Metrics)</h2>
+            <div class="dashboard-premium-pro" id="liveMetricsPanel">
+                <div class="metric-card-pro">CPU <span id="liveCpu">28%</span></div>
+                <div class="metric-card-pro">Requests/s <span id="liveReq">2.4k</span></div>
+                <div class="metric-card-pro">Latência <span id="liveLat">28ms</span></div>
+                <div class="metric-card-pro">Uptime <span id="liveUptime">99.99%</span></div>
+                <div class="metric-card-pro">Active Users <span id="liveUsers">172K</span></div>
+                <div class="metric-card-pro">Regiões <span id="liveRegions">8</span></div>
+            </div>
+        </section>
+
+        <!-- MAPA GLOBAL -->
+        <section class="fade-up"><h2>🌍 Infraestrutura Global AWS</h2>
+            <div class="map-container-epic" id="globeMapContainer">
+                <div class="map-dot-pulse" style="left:20%; top:68%;" data-region="São Paulo - Brazil"></div>
+                <div class="map-dot-pulse" style="left:45%; top:42%;" data-region="N. Virginia - USA"></div>
+                <div class="map-dot-pulse" style="left:68%; top:38%;" data-region="Frankfurt - Germany"></div>
+                <div class="map-dot-pulse" style="left:82%; top:48%;" data-region="Tokyo - Japan"></div>
+                <div class="map-dot-pulse" style="left:85%; top:72%;" data-region="Sydney - Australia"></div>
+            </div>
+            <div id="mapRegionInfo" style="text-align:center; margin-top:1rem;"></div>
+        </section>
+
+        <!-- COMPARAÇÃO + TIMELINE -->
+        <section class="fade-up"><h2>Antes vs AWS Cloud</h2>
+            <div class="comparison-split">
+                <div class="card-legacy"><i class="fas fa-database"></i> <strong>Servidor Físico Tradicional</strong><br>💰 Custo alto inicial<br>🐢 Expansão lenta (semanas)<br>🔧 Manutenção manual<br>⚠️ Risco de queda alto</div>
+                <div class="card-cloud"><i class="fas fa-cloud-upload-alt"></i> <strong>AWS Cloud Native</strong><br>💸 Pague pelo consumo<br>⚡ Expansão em minutos<br>🤖 Automático gerenciado<br>✅ 99.99% disponibilidade</div>
+            </div>
+        </section>
+
+        <section class="fade-up"><h2>🚀 Escalabilidade: 1 → 1 Milhão</h2>
+            <div class="timeline-premium-flex">
+                <div class="timeline-node-card"><h3>1 usuário</h3><p>Startup nascendo</p></div>
+                <div class="timeline-node-card"><h3>10k</h3><p>CloudFront ativado</p></div>
+                <div class="timeline-node-card"><h3>100k</h3><p>Auto Scaling reage</p></div>
+                <div class="timeline-node-card"><h3>1 Milhão</h3><p>AWS sustentável</p></div>
+            </div>
+        </section>
+
+        <!-- QUIZ INTERATIVO -->
+        <section class="fade-up"><div class="quiz-epic">
+            <h3>🧠 Desafio AWS: Qual serviço armazena arquivos estáticos?</h3>
+            <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+                <button class="quiz-option" data-ans="ec2">EC2</button><button class="quiz-option" data-ans="s3">S3</button><button class="quiz-option" data-ans="rds">RDS</button>
+            </div>
+            <div id="quizResultMessage" style="margin-top:1.2rem; font-weight:600;"></div>
+        </div></section>
+
+        <footer><p>© 2026 AWS HyperScale — A nuvem não é o futuro. É o presente.</p></footer>
+    </div>
+
+    <!-- MODAL GLOBAL -->
+    <div id="premiumModalGlobal" class="modal-premium-ultra"><div class="modal-card" id="modalDynamicInner"></div></div>
+
+    <script>
+        // ========================================================
+        // LOADER CINEMATOGRÁFICO
+        // ========================================================
+        let loadVal = 0;
+        const loaderDiv = document.getElementById('cinematicLoader');
+        const scannerFill = document.getElementById('scannerFill');
+        const loaderNumberSpan = document.getElementById('loaderNumber');
+        const loadInterval = setInterval(() => {
+            loadVal += Math.random() * 14 + 3;
+            if(loadVal >= 100) { loadVal = 100; clearInterval(loadInterval); setTimeout(() => { loaderDiv.style.opacity='0'; setTimeout(()=>loaderDiv.style.display='none',1000); },500); }
+            scannerFill.style.width = loadVal+'%';
+            loaderNumberSpan.innerText = Math.floor(loadVal)+'%';
+        }, 70);
+
+        // ========================================================
+        // PROGRESS SCROLL + SCROLL TOP
+        // ========================================================
+        window.addEventListener('scroll', () => {
+            let winScroll = document.documentElement.scrollTop, height = document.documentElement.scrollHeight - window.innerHeight, scrolled = (winScroll/height)*100;
+            document.getElementById('globalProgress').style.width = scrolled+'%';
+            const topBtn = document.getElementById('scrollTopBtn');
+            if(winScroll > 500) topBtn.classList.add('visible'); else topBtn.classList.remove('visible');
+        });
+        document.getElementById('scrollTopBtn').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+        // ========================================================
+        // CURSOR PREMIUM + TRAIL + ADAPTAÇÃO MODO CLARO
+        // ========================================================
+        const luxuryCursor = document.getElementById('luxuryCursor');
+        const trailCursor = document.getElementById('cursorTrail');
+        let mouseX=0, mouseY=0, trailX=0, trailY=0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            luxuryCursor.style.left = mouseX + 'px';
+            luxuryCursor.style.top = mouseY + 'px';
+            trailCursor.style.left = mouseX + 'px';
+            trailCursor.style.top = mouseY + 'px';
+        });
+        // magnetic buttons
+        document.querySelectorAll('.btn-magnetic-premium, .theme-toggle').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => { const rect = btn.getBoundingClientRect(); const x = e.clientX - rect.left - rect.width/2, y = e.clientY - rect.top - rect.height/2; btn.style.transform = `translate(${x*0.15}px, ${y*0.15}px)`; });
+            btn.addEventListener('mouseleave', () => btn.style.transform = '');
+        });
+
+        // ========================================================
+        // TYPING CINEMATIC
+        // ========================================================
+        const heroTyping = document.getElementById('heroTypedElite');
+        const phrasesCinema = ["Como empresas modernas escalam bilhões de acessos globalmente.","Infraestrutura elástica, segurança AES-256, baixa latência.","AWS: a plataforma que alimenta a economia digital."];
+        let idxP=0, charP=0, delFlag=false;
+        function typeCinematic() {
+            let cur = phrasesCinema[idxP];
+            if(delFlag) heroTyping.innerText = cur.substring(0, charP--);
+            else heroTyping.innerText = cur.substring(0, charP++);
+            if(!delFlag && charP === cur.length+1) { delFlag=true; setTimeout(typeCinematic, 1900); return; }
+            if(delFlag && charP === 0) { delFlag=false; idxP=(idxP+1)%phrasesCinema.length; setTimeout(typeCinematic, 280); return; }
+            setTimeout(typeCinematic, delFlag?40:65);
+        }
+        typeCinematic();
+
+        // ========================================================
+        // BACKGROUND INSANO + PARTICLES + GRID
+        // ========================================================
+        const bgCanvasAdv = document.getElementById('bg-advanced-canvas');
+        const bgCtxAdv = bgCanvasAdv.getContext('2d');
+        let particlesArray = [];
+        function resizeBgCanvas() { bgCanvasAdv.width = innerWidth; bgCanvasAdv.height = innerHeight; }
+        window.addEventListener('resize', resizeBgCanvas);
+        resizeBgCanvas();
+        for(let i=0;i<220;i++) particlesArray.push({ x:Math.random()*bgCanvasAdv.width, y:Math.random()*bgCanvasAdv.height, r:Math.random()*2+1, alpha:Math.random()*0.6, vx:(Math.random()-0.5)*0.2, vy:(Math.random()-0.5)*0.2 });
+        function drawParticlesBackground() {
+            if(!bgCtxAdv) return;
+            bgCtxAdv.clearRect(0,0,bgCanvasAdv.width,bgCanvasAdv.height);
+            bgCtxAdv.fillStyle = document.body.classList.contains('light-mode') ? '#f8fafc' : '#050816';
+            bgCtxAdv.fillRect(0,0,bgCanvasAdv.width,bgCanvasAdv.height);
+            for(let p of particlesArray) {
+                bgCtxAdv.beginPath(); bgCtxAdv.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                bgCtxAdv.fillStyle = `rgba(0, 207, 255, ${p.alpha * 0.35})`;
+                bgCtxAdv.fill();
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.x<0) p.x=bgCanvasAdv.width; if(p.x>bgCanvasAdv.width) p.x=0;
+                if(p.y<0) p.y=bgCanvasAdv.height; if(p.y>bgCanvasAdv.height) p.y=0;
+            }
+            requestAnimationFrame(drawParticlesBackground);
+        }
+        drawParticlesBackground();
+
+        // ========================================================
+        // HERO 3D ANIMATION
+        // ========================================================
+        const heroCanvasElite = document.getElementById('heroCanvasPremium');
+        if(heroCanvasElite) {
+            const ctxHero = heroCanvasElite.getContext('2d');
+            let orbitRad=0;
+            function animateHeroCanvas() {
+                heroCanvasElite.width = heroCanvasElite.clientWidth; heroCanvasElite.height = heroCanvasElite.clientHeight;
+                ctxHero.clearRect(0,0,heroCanvasElite.width,heroCanvasElite.height);
+                const cx=heroCanvasElite.width/2, cy=heroCanvasElite.height/2;
+                ctxHero.shadowBlur=15; ctxHero.shadowColor= '#00cfff';
+                ctxHero.beginPath(); ctxHero.arc(cx,cy,55,0,Math.PI*2);
+                ctxHero.fillStyle='rgba(0,207,255,0.07)'; ctxHero.fill(); ctxHero.strokeStyle='#00cfff'; ctxHero.stroke();
+                for(let i=0;i<8;i++) { let ang = orbitRad + i*Math.PI/4; let x = cx+Math.cos(ang)*115, y = cy+Math.sin(ang)*115;
+                    ctxHero.beginPath(); ctxHero.arc(x,y,10,0,Math.PI*2); ctxHero.fillStyle='#7b61ff'; ctxHero.fill();
+                    ctxHero.beginPath(); ctxHero.moveTo(cx,cy); ctxHero.lineTo(x,y); ctxHero.stroke();
+                }
+                orbitRad+=0.015;
+                requestAnimationFrame(animateHeroCanvas);
+            }
+            animateHeroCanvas();
+        }
+
+        // ========================================================
+        // MODAL PARA CARDS
+        // ========================================================
+        const modalGlobal = document.getElementById('premiumModalGlobal');
+        const modalInner = document.getElementById('modalDynamicInner');
+        const srvData = { ec2:{title:"EC2",desc:"Servidores virtuais escaláveis. Netflix usa para transcoding. Benefício: elástico."}, s3:{title:"S3",desc:"Armazenamento 99.999999999% durável. Dropbox, Netflix."}, rds:{title:"RDS",desc:"Banco gerenciado Multi-AZ, Nubank usa para alta disponibilidade."}, lambda:{title:"Lambda",desc:"Serverless automático, executa código sem servidor."}, cloudfront:{title:"CloudFront",desc:"CDN global 310+ edge locations, acelera conteúdo."} };
+        document.querySelectorAll('[data-srv]').forEach(card => {
+            card.addEventListener('click', () => {
+                let key = card.getAttribute('data-srv');
+                if(srvData[key]) { modalInner.innerHTML = `<h2>${srvData[key].title}</h2><p>${srvData[key].desc}</p><button style="margin-top:1rem;background:var(--cyan-primary);border:none;padding:0.5rem 1rem;border-radius:40px;" id="closeModalBtnPremium">Fechar</button>`; modalGlobal.classList.add('active'); document.getElementById('closeModalBtnPremium').onclick = () => modalGlobal.classList.remove('active'); }
+            });
+        });
+        modalGlobal.addEventListener('click', (e) => { if(e.target === modalGlobal) modalGlobal.classList.remove('active'); });
+
+        // ========================================================
+        // ARQUITETURA INFO
+        // ========================================================
+        document.querySelectorAll('.arch-node-glow').forEach(node => {
+            node.addEventListener('click', () => { document.getElementById('archMessageDynamic').innerHTML = `ℹ️ ${node.getAttribute('data-info') || 'Componente AWS'}`; setTimeout(()=>document.getElementById('archMessageDynamic').innerHTML='',2000); });
+        });
+
+        // ========================================================
+        // BLACK FRIDAY SIMULATION
+        // ========================================================
+        let visitorsBF = 1400, serversBF = 2, bfActiveFlag = false;
+        const bfGraphDiv = document.getElementById('bfGraphVisual');
+        const bfMsgDivLocal = document.getElementById('bfMessageArea');
+        function updateBFVisualsLocal() {
+            bfGraphDiv.innerHTML = '';
+            let barsCount = Math.min(12, Math.floor(visitorsBF/1100)+1);
+            for(let i=0;i<barsCount;i++) { let bar=document.createElement('div'); bar.style.height=(30+i*20)+'px'; bar.style.width='55px'; bar.style.background='linear-gradient(to top, #00cfff, #7b61ff)'; bar.style.borderRadius='10px 10px 0 0'; bar.innerText=i+1; bfGraphDiv.appendChild(bar); }
+            bfMsgDivLocal.innerHTML = `👥 Visitantes: ${visitorsBF.toLocaleString()} | EC2 Instâncias: ${serversBF} ${serversBF>=6 ? '✅ AWS escalou automaticamente com sucesso!' : '⚡ Escalando sob demanda...'}`;
+        }
+        document.getElementById('bfStartBtn').addEventListener('click', () => {
+            if(bfActiveFlag) return;
+            bfActiveFlag=true; visitorsBF=1400;
+            const bfInterval = setInterval(() => { if(visitorsBF<24000) visitorsBF+=Math.floor(Math.random()*2000)+1000; serversBF=Math.min(16, Math.floor(visitorsBF/1800)+2); updateBFVisualsLocal(); if(visitorsBF>=23000) { clearInterval(bfInterval); bfMsgDivLocal.innerHTML+='<div style="margin-top:1rem;background:#10b981;padding:1rem;border-radius:2rem;">🚀 AWS escalou automaticamente para 16 servidores, zero downtime!</div>'; bfActiveFlag=false; } }, 680);
+            updateBFVisualsLocal();
+        });
+        updateBFVisualsLocal();
+
+        // ========================================================
+        // LIVE DASHBOARD
+        // ========================================================
+        function refreshLiveMetrics() {
+            document.getElementById('liveCpu').innerText = (Math.random()*45+20).toFixed(0)+'%';
+            document.getElementById('liveReq').innerText = (Math.floor(Math.random()*3800)+1400).toLocaleString();
+            document.getElementById('liveLat').innerText = (Math.random()*35+18).toFixed(0)+'ms';
+            document.getElementById('liveUsers').innerText = (Math.floor(Math.random()*290000)+80000).toLocaleString();
+        }
+        setInterval(refreshLiveMetrics, 1900);
+        refreshLiveMetrics();
+
+        // ========================================================
+        // MAPA INFO
+        // ========================================================
+        document.querySelectorAll('.map-dot-pulse').forEach(dot => {
+            dot.addEventListener('click', () => { document.getElementById('mapRegionInfo').innerHTML = `📍 Região: ${dot.getAttribute('data-region')} - 3 Zonas de Disponibilidade`; setTimeout(()=>document.getElementById('mapRegionInfo').innerHTML='',2000); });
+        });
+
+        // ========================================================
+        // QUIZ
+        // ========================================================
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const ans = btn.getAttribute('data-ans');
+                const respDiv = document.getElementById('quizResultMessage');
+                if(ans === 's3') respDiv.innerHTML = '<span style="color:#00cfff;">✅ Correto! S3 é o serviço de armazenamento de objetos.</span>';
+                else respDiv.innerHTML = '<span style="color:#ff6666;">❌ Incorreto. O serviço correto é S3.</span>';
+                setTimeout(()=>respDiv.innerHTML='',2200);
+            });
+        });
+
+        // ========================================================
+        // LIGHT MODE PERFECT + LOCALSTORAGE
+        // ========================================================
+        const themeBtn = document.getElementById('globalThemeToggle');
+        const isLightStored = localStorage.getItem('awsTheme') === 'light';
+        if(isLightStored) { document.body.classList.add('light-mode'); themeBtn.innerHTML = '<i class="fas fa-sun"></i> Light'; }
+        themeBtn.addEventListener('click', () => {
+            if(document.body.classList.contains('light-mode')) {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('awsTheme', 'dark');
+                themeBtn.innerHTML = '<i class="fas fa-moon"></i> Dark';
+            } else {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('awsTheme', 'light');
+                themeBtn.innerHTML = '<i class="fas fa-sun"></i> Light';
+            }
+        });
+
+        // ========================================================
+        // SCROLL OBSERVER
+        // ========================================================
+        const fadeObserver = new IntersectionObserver((entries) => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold:0.2 });
+        document.querySelectorAll('.fade-up').forEach(el => fadeObserver.observe(el));
+        document.getElementById('exploreEliteBtn').addEventListener('click', () => { window.scrollTo({top: window.innerHeight, behavior:'smooth'}); });
+    </script>
+</body>
+</html>
